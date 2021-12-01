@@ -1,0 +1,1 @@
+Work for Advent of Code 2021 in Rust
