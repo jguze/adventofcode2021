@@ -7,7 +7,7 @@ enum Direction {
     Forward(u32),
 }
 
-fn parse_direction(dir_text: String) -> Direction {
+fn parse_direction(dir_text: &str) -> Direction {
     let tokens: Vec<&str> = dir_text.split(" ").collect();
 
     let distance = tokens[1].parse::<u32>().unwrap();
@@ -27,13 +27,9 @@ pub fn part1() {
     let mut depth = 0;
 
     for line in reader.lines() {
-        let text = line
-            .expect("Read line correctly")
-            .to_string()
-            .parse::<String>()
-            .unwrap();
+        let text = line.unwrap();
 
-        let direction = parse_direction(text);
+        let direction = parse_direction(&text);
         match direction {
             Direction::Forward(d) => {
                 horizontal += d;
@@ -60,13 +56,9 @@ pub fn part2() {
     let mut aim = 0;
 
     for line in reader.lines() {
-        let text = line
-            .expect("Read line correctly")
-            .to_string()
-            .parse::<String>()
-            .unwrap();
+        let text = line.unwrap();
 
-        let direction = parse_direction(text);
+        let direction = parse_direction(&text);
         match direction {
             Direction::Forward(d) => {
                 horizontal += d;
