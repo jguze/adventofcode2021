@@ -2,13 +2,8 @@ use std::cmp;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 
-fn main() {
-    part1();
-    part2();
-}
-
-fn part1() {
-    let file = File::open("input1.txt").unwrap();
+pub fn part1() {
+    let file = File::open("inputs/day1/part1.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut increased = 0;
@@ -37,8 +32,8 @@ fn part1() {
     );
 }
 
-fn part2() {
-    let file = File::open("input2.txt").unwrap();
+pub fn part2() {
+    let file = File::open("inputs/day1/part2.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut increased = 0;
