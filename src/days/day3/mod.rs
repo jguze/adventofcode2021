@@ -7,12 +7,13 @@ enum BinCmp {
     Equal,
 }
 
-fn is_most_common(nums: &Vec<String>, index: usize) -> BinCmp {
+fn is_most_common(nums: &Vec<u32>, bit_pos: usize) -> BinCmp {
     let mut ones = 0;
     let mut zeros = 0;
+    let bit = 1 << bit_pos;
 
     for num in nums {
-        if num.chars().nth(index).unwrap() == '1' {
+        if num & bit == bit {
             ones += 1;
         } else {
             zeros += 1;
@@ -42,8 +43,10 @@ fn convert_bin_to_decimal(binary_str: &str) -> u32 {
     return value;
 }
 
-fn retain_by_char(bin_vec: &mut Vec<String>, index: usize, char_to_filter: char) {
-    bin_vec.retain(|o| o.chars().nth(index).unwrap() == char_to_filter);
+fn retain_by_bit(bin_vec: &mut Vec<u32>, bit_pos: usize, bit_value: u8) {
+    let bit = 1 << bit_pos;
+    let comparator = if bit_value == 1 { bit } else { 0 };
+    bin_vec.retain(|o| o & bit == comparator);
 }
 
 pub fn part1() {
@@ -52,26 +55,31 @@ pub fn part1() {
 
     let mut numbers = vec![];
 
+    let mut maxlen: Option<usize> = None;
+
     for line in reader.lines() {
         let text = line.unwrap();
-        numbers.push(text);
+        numbers.push(convert_bin_to_decimal(&text));
+
+        if maxlen.is_none() {
+            maxlen = Some(text.len());
+        }
     }
 
     if numbers.len() == 0 {
         return;
     }
 
-    let maxlen = numbers[0].len();
-
+    let maxlen = maxlen.unwrap();
     let mut gamma = 0;
     let mut epsilon = 0;
 
     for i in 0..maxlen {
-        let position = maxlen - i - 1;
-        if matches!(is_most_common(&numbers, i), BinCmp::One) {
-            gamma += 1 << position;
+        let bit_position = maxlen - i - 1;
+        if matches!(is_most_common(&numbers, bit_position), BinCmp::One) {
+            gamma += 1 << bit_position;
         } else {
-            epsilon += 1 << position;
+            epsilon += 1 << bit_position;
         }
     }
 
@@ -84,40 +92,45 @@ pub fn part2() {
     let reader = BufReader::new(file);
 
     let mut numbers = vec![];
+    let mut maxlen: Option<usize> = None;
 
     for line in reader.lines() {
         let text = line.unwrap();
-        numbers.push(text);
+        numbers.push(convert_bin_to_decimal(&text));
+
+        if maxlen.is_none() {
+            maxlen = Some(text.len());
+        }
     }
 
     if numbers.len() == 0 {
         return;
     }
 
-    let maxlen = numbers[0].len();
-
     let mut oxygen_vec = numbers.clone();
     let mut co_vec = numbers.clone();
+    let maxlen = maxlen.unwrap();
 
     for i in 0..maxlen {
+        let bit_position = maxlen - i - 1;
         if oxygen_vec.len() > 1 {
-            match is_most_common(&oxygen_vec, i) {
+            match is_most_common(&oxygen_vec, bit_position) {
                 BinCmp::One | BinCmp::Equal => {
-                    retain_by_char(&mut oxygen_vec, i, '1');
+                    retain_by_bit(&mut oxygen_vec, bit_position, 1);
                 }
                 BinCmp::Zero => {
-                    retain_by_char(&mut oxygen_vec, i, '0');
+                    retain_by_bit(&mut oxygen_vec, bit_position, 0);
                 }
             }
         }
 
         if co_vec.len() > 1 {
-            match is_most_common(&co_vec, i) {
+            match is_most_common(&co_vec, bit_position) {
                 BinCmp::One | BinCmp::Equal => {
-                    retain_by_char(&mut co_vec, i, '0');
+                    retain_by_bit(&mut co_vec, bit_position, 0);
                 }
                 BinCmp::Zero => {
-                    retain_by_char(&mut co_vec, i, '1');
+                    retain_by_bit(&mut co_vec, bit_position, 1);
                 }
             }
         }
@@ -127,15 +140,6 @@ pub fn part2() {
         }
     }
 
-    println!(
-        "oxygen {} ({}), co2 {} ({})",
-        oxygen_vec[0],
-        convert_bin_to_decimal(&oxygen_vec[0]),
-        co_vec[0],
-        convert_bin_to_decimal(&co_vec[0])
-    );
-    println!(
-        "Answer - {}",
-        convert_bin_to_decimal(&oxygen_vec[0]) * convert_bin_to_decimal(&co_vec[0])
-    );
+    println!("oxygen ({}), co2 ({})", oxygen_vec[0], co_vec[0],);
+    println!("Answer - {}", oxygen_vec[0] * &co_vec[0]);
 }
