@@ -26,10 +26,7 @@ pub fn part1() {
         prev_num = Some(num);
     }
 
-    println!(
-        "Part 1\nIncreased - {}\nDecreased - {}",
-        increased, decreased
-    );
+    println!("Increased - {}\nDecreased - {}", increased, decreased);
 }
 
 pub fn part2() {
@@ -64,5 +61,5 @@ pub fn part2() {
         prev_num = Some(current_num);
     }
 
-    println!("Part2\nIncreased - {}", increased);
+    println!("Increased - {}", increased);
 }

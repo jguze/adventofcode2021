@@ -1,24 +1,20 @@
 mod days;
-use days::day1;
-use days::day2;
+use days::*;
 
 extern crate clap;
 use clap::{App, Arg};
 
-fn run_part(part1_fn: fn(), part2_fn: fn(), part: &str) {
-    match part {
-        "1" => {
-            println!("Part 1");
-            part1_fn();
-        }
-        "2" => {
-            println!("Part 2");
-            part2_fn();
-        }
-        _ => {
-            panic!("Part must be chosen");
-        }
+fn run_part(part_fn_vec: Vec<fn()>, part: &str) {
+    let part_num = part
+        .parse::<usize>()
+        .expect("Valid part number must be chosen");
+
+    if part_num > part_fn_vec.len() {
+        panic!("Part {} doesn't exist", part_num);
     }
+
+    println!("Part {}", part_num);
+    part_fn_vec[part_num - 1]();
 }
 
 fn main() {
@@ -50,10 +46,13 @@ fn main() {
     print!("Day {} - ", day);
     match day {
         "1" => {
-            run_part(day1::part1, day1::part2, part);
+            run_part(vec![day1::part1, day1::part2], part);
         }
         "2" => {
-            run_part(day2::part1, day2::part2, part);
+            run_part(vec![day2::part1, day2::part2], part);
+        }
+        "3" => {
+            run_part(vec![day3::part1, day3::part2], part);
         }
         _ => {
             println!("Day {} not found", day);
