@@ -30,13 +30,12 @@ fn is_most_common(nums: &Vec<String>, index: usize) -> BinCmp {
 
 fn convert_bin_to_decimal(binary_str: &str) -> u32 {
     let len = binary_str.len();
-    let base: u32 = 2;
     let mut value: u32 = 0;
 
     for i in 0..len {
         let position = len - i - 1;
         if binary_str.chars().nth(i).unwrap() == '1' {
-            value += base.pow(position.try_into().unwrap());
+            value += 1 << position;
         }
     }
 
@@ -62,8 +61,6 @@ pub fn part1() {
         return;
     }
 
-    let base: i32 = 2;
-
     let maxlen = numbers[0].len();
 
     let mut gamma = 0;
@@ -72,9 +69,9 @@ pub fn part1() {
     for i in 0..maxlen {
         let position = maxlen - i - 1;
         if matches!(is_most_common(&numbers, i), BinCmp::One) {
-            gamma += base.pow(position.try_into().unwrap());
+            gamma += 1 << position;
         } else {
-            epsilon += base.pow(position.try_into().unwrap());
+            epsilon += 1 << position;
         }
     }
 
