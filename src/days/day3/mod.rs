@@ -43,8 +43,8 @@ fn convert_bin_to_decimal(binary_str: &str) -> u32 {
     return value;
 }
 
-fn retain_by_char(bin_vec: &mut Vec<String>, index: usize, char_to_filer: char) {
-    bin_vec.retain(|o| o.chars().nth(index).unwrap() == char_to_filer);
+fn retain_by_char(bin_vec: &mut Vec<String>, index: usize, char_to_filter: char) {
+    bin_vec.retain(|o| o.chars().nth(index).unwrap() == char_to_filter);
 }
 
 pub fn part1() {
