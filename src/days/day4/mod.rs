@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 
@@ -147,7 +148,7 @@ fn run_bingo(variant: BingoVariant) {
     let mut unmarked_count: Option<u32> = None;
     let mut last_entry: Option<u32> = None;
 
-    let mut winners: Vec<usize> = vec![];
+    let mut winners: HashSet<usize> = HashSet::new();
 
     let num_boards = boards.len();
 
@@ -156,7 +157,7 @@ fn run_bingo(variant: BingoVariant) {
             if !winners.contains(&i) {
                 board.try_mark_entry(*num);
                 if board.is_entry_winner(*num) {
-                    winners.push(i);
+                    winners.insert(i);
                     // Part 1 and 2 differ only by choosing either the first winning board, or last one
                     let found_solution = match &variant {
                         BingoVariant::Part1 => true,
@@ -176,12 +177,14 @@ fn run_bingo(variant: BingoVariant) {
     if unmarked_count.is_none() {
         println!("No bingo boards won with the current input");
     } else {
+        let unmarked_count = unmarked_count.unwrap();
+        let last_entry = last_entry.unwrap();
+
         println!(
             "Last number called - {}, unmarked count - {}",
-            last_entry.unwrap(),
-            unmarked_count.unwrap()
+            last_entry, unmarked_count
         );
-        println!("Answer - {}", last_entry.unwrap() * unmarked_count.unwrap());
+        println!("Answer - {}", last_entry * unmarked_count);
     }
 }
 
