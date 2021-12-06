@@ -1,8 +1,10 @@
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 
-const FISH_RESPAWN_DAYS: u32 = 6;
-const FISH_NEW_DAYS: u32 = 8;
+// Technically + 1 day due to 0 index
+const FISH_RESPAWN_DAYS: usize = 6 + 1;
+const FISH_NEW_DAYS: usize = 8 + 1;
+const MAX_FISH_GROUP: usize = 9;
 
 enum QVariant {
     Part1,
@@ -13,14 +15,19 @@ fn run_problem(variant: QVariant) {
     let file = File::open("inputs/day6/input.txt").unwrap();
     let reader = BufReader::new(file);
 
-    let mut fishes: Vec<u32> = reader
+    let starter_fishes: Vec<usize> = reader
         .lines()
         .next()
         .unwrap()
         .unwrap()
         .split(",")
-        .map(|x| x.parse::<u32>().unwrap())
+        .map(|x| x.parse::<usize>().unwrap())
         .collect();
+
+    let mut fish_group: [u64; 9] = [0; 9];
+    for fish in &starter_fishes {
+        fish_group[*fish] += 1;
+    }
 
     let num_days = match variant {
         QVariant::Part1 => 80,
@@ -28,24 +35,14 @@ fn run_problem(variant: QVariant) {
     };
 
     for i in 0..num_days {
-        println!("Day - {}", i);
-        let mut new_fishes = 0;
-        for fish in &mut fishes {
-            if *fish == 0 {
-                *fish = FISH_RESPAWN_DAYS;
-                new_fishes += 1;
-            } else {
-                *fish -= 1;
-            }
-        }
-
-        while new_fishes > 0 {
-            fishes.push(FISH_NEW_DAYS);
-            new_fishes -= 1;
-        }
+        let curr_day_0 = i % MAX_FISH_GROUP;
+        let fish_refreshed = fish_group[curr_day_0];
+        fish_group[curr_day_0] = 0;
+        fish_group[(curr_day_0 + FISH_RESPAWN_DAYS) % MAX_FISH_GROUP] += fish_refreshed;
+        fish_group[(curr_day_0 + FISH_NEW_DAYS) % MAX_FISH_GROUP] += fish_refreshed;
     }
 
-    println!("Answer - {}", fishes.len());
+    println!("Answer - {}", fish_group.iter().sum::<u64>());
 }
 
 pub fn part1() {
