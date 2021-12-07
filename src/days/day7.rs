@@ -21,13 +21,15 @@ fn move_to(
             QVariant::Part2 => {
                 // micro optimization using lookup table.
                 // Without this, Debug builds take 20+ seconds, and release takes 0.7s
-                // Adding the lookup makes it run in 2.5s in Debug, and 0.1s in release
-                if lookup_map.contains_key(pos) {
-                    fuel += lookup_map.get(pos).unwrap();
+                // Adding the lookup makes it run in 1.5s in Debug, and 0.1s in release
+                let diff = ((goal as i32) - *pos as i32).abs();
+                let diff_lookup = &(diff as usize);
+                if lookup_map.contains_key(diff_lookup) {
+                    fuel += lookup_map.get(diff_lookup).unwrap();
                 } else {
-                    let total = (0..(goal as i32 - *pos as i32).abs() + 1).sum::<i32>();
+                    let total = ((diff + 1) * diff) / 2;
                     fuel += total;
-                    lookup_map.insert(*pos, total);
+                    lookup_map.insert(diff as usize, total);
                 }
             }
         }
