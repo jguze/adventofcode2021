@@ -8,28 +8,27 @@ enum QVariant {
 }
 
 fn move_to(
-    positions: &Vec<usize>,
-    goal: usize,
+    positions: &Vec<i32>,
+    goal: i32,
     variant: &QVariant,
-    lookup_map: &mut HashMap<usize, i32>,
+    lookup_map: &mut HashMap<i32, i32>,
 ) -> u32 {
     let mut fuel = 0;
 
     for pos in positions {
         match variant {
-            QVariant::Part1 => fuel += (goal as i32 - *pos as i32).abs(),
+            QVariant::Part1 => fuel += (goal - *pos).abs(),
             QVariant::Part2 => {
                 // micro optimization using lookup table.
                 // Without this, Debug builds take 20+ seconds, and release takes 0.7s
                 // Adding the lookup makes it run in 1.5s in Debug, and 0.1s in release
-                let diff = ((goal as i32) - *pos as i32).abs();
-                let diff_lookup = &(diff as usize);
-                if lookup_map.contains_key(diff_lookup) {
-                    fuel += lookup_map.get(diff_lookup).unwrap();
+                let diff = (goal - *pos).abs();
+                if lookup_map.contains_key(&diff) {
+                    fuel += lookup_map.get(&diff).unwrap();
                 } else {
                     let total = ((diff + 1) * diff) / 2;
                     fuel += total;
-                    lookup_map.insert(diff as usize, total);
+                    lookup_map.insert(diff, total);
                 }
             }
         }
@@ -42,17 +41,17 @@ fn run_problem(variant: QVariant) {
     let file = File::open("inputs/day7/input.txt").unwrap();
     let reader = BufReader::new(file);
 
-    let positions: Vec<usize> = reader
+    let positions: Vec<i32> = reader
         .lines()
         .next()
         .unwrap()
         .unwrap()
         .split(",")
-        .map(|x| x.parse::<usize>().unwrap())
+        .map(|x| x.parse::<i32>().unwrap())
         .collect();
 
     let max = positions.iter().max().unwrap();
-    let mut lookup_map: HashMap<usize, i32> = HashMap::new();
+    let mut lookup_map: HashMap<i32, i32> = HashMap::new();
     let mut fuel_costs = vec![];
     for i in 0..max + 1 {
         fuel_costs.push(move_to(&positions, i, &variant, &mut lookup_map));
