@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 
@@ -6,12 +7,29 @@ enum QVariant {
     Part2,
 }
 
-fn move_to(positions: &Vec<usize>, goal: usize, variant: &QVariant) -> u32 {
+fn move_to(
+    positions: &Vec<usize>,
+    goal: usize,
+    variant: &QVariant,
+    lookup_map: &mut HashMap<usize, i32>,
+) -> u32 {
     let mut fuel = 0;
+
     for pos in positions {
         match variant {
             QVariant::Part1 => fuel += (goal as i32 - *pos as i32).abs(),
-            QVariant::Part2 => fuel += (0..(goal as i32 - *pos as i32).abs() + 1).sum::<i32>(),
+            QVariant::Part2 => {
+                // micro optimization using lookup table.
+                // Without this, Debug builds take 20+ seconds, and release takes 0.7s
+                // Adding the lookup makes it run in 2.5s in Debug, and 0.1s in release
+                if lookup_map.contains_key(pos) {
+                    fuel += lookup_map.get(pos).unwrap();
+                } else {
+                    let total = (0..(goal as i32 - *pos as i32).abs() + 1).sum::<i32>();
+                    fuel += total;
+                    lookup_map.insert(*pos, total);
+                }
+            }
         }
     }
 
@@ -32,9 +50,10 @@ fn run_problem(variant: QVariant) {
         .collect();
 
     let max = positions.iter().max().unwrap();
+    let mut lookup_map: HashMap<usize, i32> = HashMap::new();
     let mut fuel_costs = vec![];
     for i in 0..max + 1 {
-        fuel_costs.push(move_to(&positions, i, &variant));
+        fuel_costs.push(move_to(&positions, i, &variant, &mut lookup_map));
     }
 
     let min = fuel_costs.iter().min().unwrap();
