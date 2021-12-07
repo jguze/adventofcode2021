@@ -20,7 +20,7 @@ fn parse_direction(dir_text: &str) -> Direction {
 }
 
 pub fn part1() {
-    let file = File::open("inputs/day2/part1.txt").unwrap();
+    let file = File::open("inputs/day2/input.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut horizontal = 0;
@@ -48,7 +48,7 @@ pub fn part1() {
 }
 
 pub fn part2() {
-    let file = File::open("inputs/day2/part2.txt").unwrap();
+    let file = File::open("inputs/day2/input.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut horizontal = 0;

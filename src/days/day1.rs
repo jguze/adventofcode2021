@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{prelude::*, BufReader};
 
 pub fn part1() {
-    let file = File::open("inputs/day1/part1.txt").unwrap();
+    let file = File::open("inputs/day1/input.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut increased = 0;
@@ -30,7 +30,7 @@ pub fn part1() {
 }
 
 pub fn part2() {
-    let file = File::open("inputs/day1/part2.txt").unwrap();
+    let file = File::open("inputs/day1/input.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut increased = 0;

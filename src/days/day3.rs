@@ -50,7 +50,7 @@ fn retain_by_bit(bin_vec: &mut Vec<u32>, bit_pos: usize, bit_value: u8) {
 }
 
 pub fn part1() {
-    let file = File::open("inputs/day3/part1.txt").unwrap();
+    let file = File::open("inputs/day3/input.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut numbers = vec![];
@@ -88,7 +88,7 @@ pub fn part1() {
 }
 
 pub fn part2() {
-    let file = File::open("inputs/day3/part2.txt").unwrap();
+    let file = File::open("inputs/day3/input.txt").unwrap();
     let reader = BufReader::new(file);
 
     let mut numbers = vec![];
