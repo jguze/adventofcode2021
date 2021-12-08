@@ -66,6 +66,9 @@ fn main() {
         "7" => {
             run_part(vec![day7::part1, day7::part2], part);
         }
+        "8" => {
+            run_part(vec![day8::part1, day8::part2], part);
+        }
         _ => {
             println!("Day {} not found", day);
         }

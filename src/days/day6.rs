@@ -25,9 +25,9 @@ fn run_problem(variant: QVariant) {
         .collect();
 
     let mut fish_group: [u64; 9] = [0; 9];
-    for fish in &starter_fishes {
+    starter_fishes.iter().for_each(|fish| {
         fish_group[*fish] += 1;
-    }
+    });
 
     let num_days = match variant {
         QVariant::Part1 => 80,
