@@ -259,7 +259,10 @@ fn run_problem(variant: QVariant) {
         let display_signals: Vec<&str> = tokens[1].split_whitespace().collect();
 
         let mut map = map_signals(&input_signals);
-        slot_signals(&input_signals, &mut map);
+
+        if matches!(variant, QVariant::Part2) {
+            slot_signals(&input_signals, &mut map);
+        }
 
         let base: i32 = 10;
         for (e, signal) in display_signals.iter().enumerate() {
