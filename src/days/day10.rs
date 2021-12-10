@@ -7,28 +7,10 @@ enum QVariant {
     Part2,
 }
 
-fn find_illegal_closing(input: &str, complement_map: &HashMap<char, char>) -> Option<char> {
-    let mut stack = vec![];
-    for c in input.chars() {
-        if complement_map.contains_key(&c) {
-            stack.push(complement_map.get(&c).unwrap());
-        } else {
-            let maybe_expected = stack.pop();
-            if maybe_expected.is_none() {
-                panic!("This should not be possible!");
-            }
-
-            let expected = maybe_expected.unwrap();
-            if c != *expected {
-                return Some(c);
-            }
-        }
-    }
-
-    None
-}
-
-fn find_incomplete_lines(input: &str, complement_map: &HashMap<char, char>) -> Vec<char> {
+fn find_illegal_closing_and_complete(
+    input: &str,
+    complement_map: &HashMap<char, char>,
+) -> (Option<char>, Option<Vec<char>>) {
     let mut stack = vec![];
     for c in input.chars() {
         if complement_map.contains_key(&c) {
@@ -41,12 +23,12 @@ fn find_incomplete_lines(input: &str, complement_map: &HashMap<char, char>) -> V
 
             let expected = maybe_expected.unwrap();
             if c != expected {
-                panic!("There should be no illegal strings");
+                return (Some(c), None);
             }
         }
     }
 
-    stack
+    (None, Some(stack))
 }
 
 fn run_problem(variant: QVariant) {
@@ -68,13 +50,13 @@ fn run_problem(variant: QVariant) {
     for line in reader.lines() {
         let mut missing_closing_score = 0;
         let input = line.unwrap();
-        let maybe_illegal = find_illegal_closing(&input, &complement_map);
+        let (maybe_illegal, maybe_missing_close_chars) =
+            find_illegal_closing_and_complete(&input, &complement_map);
 
         if maybe_illegal.is_some() {
             illegal_closing_score += illegal_score_map.get(&maybe_illegal.unwrap()).unwrap();
         } else {
-            let mut missing_close_chars = find_incomplete_lines(&input, &complement_map);
-            dbg!(&missing_close_chars);
+            let mut missing_close_chars = maybe_missing_close_chars.unwrap();
             while let Some(c) = missing_close_chars.pop() {
                 missing_closing_score =
                     (missing_closing_score * 5) + missing_score_map.get(&c).unwrap();
