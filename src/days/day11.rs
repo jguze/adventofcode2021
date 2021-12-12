@@ -79,6 +79,13 @@ fn propogate(
     }
 }
 
+/*
+    1. Loop through all jellyfish - increase by 1. If anything > 9, put in to_flash queue
+    2. For each pair in to_flash queue
+        a. Add to flashed set.
+        b. Increase all neighbours by 1. Add to flash queue if > 9
+    3. For each pair in flashed set - set to 0
+*/
 fn step(jellyfish: &mut Vec<Vec<u32>>) -> u32 {
     let row_len = jellyfish.len();
     let col_len = jellyfish[0].len();
@@ -134,14 +141,6 @@ fn run_problem(variant: QVariant) {
             break;
         }
     }
-
-    /*
-       1. 2x for loop - increase by 1. If anything > 9, put in to_flash queue
-       2. For each pair in to_flash queue
-          a. Add to flashed set.
-          b. Increase all neighbours by 1. Add to flash queue if > 9
-       3. For each pair in flashed set - set to 0
-    */
 
     match variant {
         QVariant::Part1 => {
