@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 mod days;
 use days::*;
 
@@ -14,7 +16,13 @@ fn run_part(part_fn_vec: Vec<fn()>, part: &str) {
     }
 
     println!("Part {}", part_num);
+
+    let now = Instant::now();
+
     part_fn_vec[part_num - 1]();
+    let elapsed = now.elapsed();
+
+    println!("Elapsed: {:.2?}", elapsed);
 }
 
 fn main() {

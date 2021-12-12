@@ -22,33 +22,31 @@ type Link = Rc<RefCell<Node>>;
 struct Node {
     id: String,
     edges: Vec<Link>,
+    is_start: bool,
+    is_end: bool,
+    is_large: bool,
 }
 
 impl Node {
-    fn is_start(&self) -> bool {
-        self.id == START_ID
-    }
-
-    fn is_end(&self) -> bool {
-        self.id == END_ID
-    }
-
-    fn is_large(&self) -> bool {
-        self.id.chars().nth(0).unwrap().is_uppercase()
+    fn new(id: String) -> Node {
+        Node {
+            edges: vec![],
+            is_start: id == START_ID,
+            is_end: id == END_ID,
+            is_large: id.chars().nth(0).unwrap().is_uppercase(),
+            id,
+        }
     }
 }
 
 fn find_paths(
     node: &Node,
-    cur_path: &mut Vec<String>,
     visited: &mut HashMap<String, u32>,
-    paths: &mut Vec<Vec<String>>,
     small_cave_max: bool,
     variant: &QVariant,
-) {
-    if node.is_end() {
-        paths.push(cur_path.clone());
-        return;
+) -> u32 {
+    if node.is_end {
+        return 1;
     }
 
     let mut small_cave_max = small_cave_max;
@@ -58,22 +56,22 @@ fn find_paths(
         match variant {
             QVariant::Part1 => {
                 if *count >= 1 {
-                    return;
+                    return 0;
                 }
             }
             QVariant::Part2 => {
                 if *count == 2 {
-                    return;
+                    return 0;
                 } else if *count >= 1 && small_cave_max {
-                    return;
+                    return 0;
                 }
             }
         }
 
         // Never return to start
-        if node.is_start() {
+        if node.is_start {
             *count += 2;
-        } else if !node.is_large() {
+        } else if !node.is_large {
             *count += 1;
 
             // After visiting a small cave twice, you now can only visit remaining small caves once
@@ -83,28 +81,27 @@ fn find_paths(
         }
     }
 
+    let mut total_paths = 0;
     for edge in &node.edges {
         let edge = edge.as_ref().borrow();
-        cur_path.push(edge.id.to_string());
-        find_paths(&edge, cur_path, visited, paths, small_cave_max, variant);
-        cur_path.pop();
+        total_paths += find_paths(&edge, visited, small_cave_max, variant);
     }
 
-    if !node.is_large() {
+    if !node.is_large {
         // Have to pull this out again to appease the mutability reference,
         // since we pass it into the previous function recursively
         let count = visited.get_mut(&node.id).unwrap();
         *count -= 1;
     }
+
+    total_paths
 }
 
 fn run_problem(variant: QVariant) {
     let file = File::open("inputs/day12/input.txt").unwrap();
     let reader = BufReader::new(file);
 
-    // Today I learned about Rc and RefCell very much the hard way
-    // See: https://doc.rust-lang.org/std/cell/index.html#introducing-mutability-inside-of-something-immutable
-    let shared_node_map: Rc<RefCell<_>> = Rc::new(RefCell::new(HashMap::new()));
+    let mut node_map: HashMap<_, _> = HashMap::new();
 
     for line in reader.lines() {
         let input = line.unwrap();
@@ -114,6 +111,8 @@ fn run_problem(variant: QVariant) {
         let node2_id = &nodes[1];
 
         /*
+            Today I learned about Rc and RefCell very much the hard way
+            See: https://doc.rust-lang.org/std/cell/index.html#introducing-mutability-inside-of-something-immutable
             This specific part was actually really annoying.
             All I wanted to do was to create the nodes, and add them to a hashmap
             if they didn't exist. That way, when I create edges, I could look for previously-created
@@ -127,24 +126,16 @@ fn run_problem(variant: QVariant) {
                 2. https://rust-unofficial.github.io/too-many-lists/index.html
                 3. https://stackoverflow.com/questions/57857832/implement-a-graph-structure-in-rust
         */
-        {
-            let mut map = shared_node_map.borrow_mut();
-            map.entry(node1_id.to_string())
-                .or_insert(Rc::new(RefCell::new(Node {
-                    id: node1_id.to_string(),
-                    edges: vec![],
-                })));
+        node_map
+            .entry(node1_id.to_string())
+            .or_insert(Rc::new(RefCell::new(Node::new(node1_id.to_string()))));
 
-            map.entry(node2_id.to_string())
-                .or_insert(Rc::new(RefCell::new(Node {
-                    id: node2_id.to_string(),
-                    edges: vec![],
-                })));
-        }
+        node_map
+            .entry(node2_id.to_string())
+            .or_insert(Rc::new(RefCell::new(Node::new(node2_id.to_string()))));
 
-        let map = shared_node_map.borrow();
-        let node1_rc = map.get(node1_id).unwrap();
-        let node2_rc = map.get(node2_id).unwrap();
+        let node1_rc = node_map.get(node1_id).unwrap();
+        let node2_rc = node_map.get(node2_id).unwrap();
 
         let mut node = node1_rc.as_ref().borrow_mut();
         node.edges.push(Rc::clone(node2_rc));
@@ -153,22 +144,11 @@ fn run_problem(variant: QVariant) {
         node2.edges.push(Rc::clone(node1_rc))
     }
 
-    let node_map = shared_node_map.borrow();
     let start_node = node_map.get(START_ID).unwrap().as_ref().borrow();
 
-    let mut paths = vec![];
-    let mut cur_path = vec![];
-    cur_path.push(start_node.id.to_string());
-    find_paths(
-        &start_node,
-        &mut cur_path,
-        &mut HashMap::new(),
-        &mut paths,
-        false,
-        &variant,
-    );
+    let paths = find_paths(&start_node, &mut HashMap::new(), false, &variant);
 
-    println!("Answer - {}", paths.len());
+    println!("Answer - {}", paths);
 }
 
 pub fn part1() {
