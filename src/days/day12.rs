@@ -51,7 +51,7 @@ fn find_paths(
 
     let mut small_cave_max = small_cave_max;
 
-    {
+    if !node.is_large {
         let count = visited.entry(node.id.to_string()).or_insert(0);
         match variant {
             QVariant::Part1 => {
@@ -67,17 +67,10 @@ fn find_paths(
                 }
             }
         }
-
-        // Never return to start
-        if node.is_start {
-            *count += 2;
-        } else if !node.is_large {
-            *count += 1;
-
-            // After visiting a small cave twice, you now can only visit remaining small caves once
-            if *count == 2 {
-                small_cave_max = true;
-            }
+        *count += 1;
+        // After visiting a small cave twice, you now can only visit remaining small caves once
+        if *count == 2 {
+            small_cave_max = true;
         }
     }
 
@@ -137,11 +130,16 @@ fn run_problem(variant: QVariant) {
         let node1_rc = node_map.get(node1_id).unwrap();
         let node2_rc = node_map.get(node2_id).unwrap();
 
-        let mut node = node1_rc.as_ref().borrow_mut();
-        node.edges.push(Rc::clone(node2_rc));
+        // Don't waste time walking back to the start
+        if !node2_rc.as_ref().borrow().is_start {
+            let mut node = node1_rc.as_ref().borrow_mut();
+            node.edges.push(Rc::clone(node2_rc));
+        }
 
-        let mut node2 = node2_rc.as_ref().borrow_mut();
-        node2.edges.push(Rc::clone(node1_rc))
+        if !node1_rc.as_ref().borrow().is_start {
+            let mut node2 = node2_rc.as_ref().borrow_mut();
+            node2.edges.push(Rc::clone(node1_rc))
+        }
     }
 
     let start_node = node_map.get(START_ID).unwrap().as_ref().borrow();
